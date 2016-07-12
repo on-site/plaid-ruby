@@ -132,8 +132,8 @@ module Plaid
         raise ArgumentError, 'Plaid::Account#update_from: id != another.id!'
       end
 
-      %i(item_id meta name type subtype institution available_balance
-         current_balance numbers risk).each do |field|
+      [:item_id, :meta, :name, :type, :subtype, :institution, :available_balance,
+         :current_balance, :numbers, :risk].each do |field|
         value = another.send(field)
         instance_variable_set("@#{field}", value) unless value.nil?
       end
