@@ -39,8 +39,8 @@ module Plaid
     #          (default: Plaid.client).
     #
     # Returns an Array of Category instances.
-    def self.all(client: nil)
-      Connector.new(:categories, client: client).get.map do |category_data|
+    def self.all(options = {})
+      Connector.new(:categories, client: options[:client]).get.map do |category_data|
         new(category_data)
       end
     end
@@ -55,8 +55,8 @@ module Plaid
     #
     # Returns a Category instance or raises Plaid::NotFoundError if category
     # with given id is not found.
-    def self.get(id, client: nil)
-      new Connector.new(:categories, id, client: client).get
+    def self.get(id, options = {})
+      new Connector.new(:categories, id, client: options[:client]).get
     end
   end
 end

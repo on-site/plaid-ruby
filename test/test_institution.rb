@@ -34,7 +34,7 @@ class PlaidInstitutionTest < MiniTest::Test
     assert_equal %w(code list), i.mfa
 
     assert_equal 'Chase', i.name
-    assert_equal %i(connect auth balance info income risk), i.products
+    assert_equal [:connect, :auth, :balance, :info, :income, :risk], i.products
     assert_equal 'chase', i.type
   end
 
@@ -59,7 +59,7 @@ class PlaidInstitutionTest < MiniTest::Test
     assert_equal %w(code list), i.mfa
 
     assert_equal 'Chase', i.name
-    assert_equal %i(connect auth balance info income risk), i.products
+    assert_equal [:connect, :auth, :balance, :info, :income, :risk], i.products
     assert_equal 'chase', i.type
   end
 

@@ -80,8 +80,8 @@ module Plaid
     #               (default is to use global Plaid client - Plaid.client).
     #
     # Returns a Plaid::User instance.
-    def self.create(product, institution, username, password,
-                    pin: nil, options: nil, client: nil)
+    def self.create(product, institution, username, password, options_hash = {})
+      pin, options, client = options_hash[:pin], options_hash[:options], options_hash[:client]
       check_product product
 
       payload = { username: username, password: password,
@@ -107,8 +107,8 @@ module Plaid
     #           (default is to use global Plaid client - Plaid.client).
     #
     # Returns a Plaid::User instance.
-    def self.load(product, token, client: nil)
-      new check_product(product), access_token: token, client: client
+    def self.load(product, token, options = {})
+      new check_product(product), access_token: token, client: options[:client]
     end
 
     # Public: Exchange a Link public_token for an API access_token.
@@ -125,8 +125,13 @@ module Plaid
     # Returns a new User with access token obtained from Plaid and default
     # product set to product. User#stripe_bank_account_token for this user
     # instance will contain the Stripe token.
-    def self.exchange_token(public_token, account_id = nil,
-                            product: :connect, client: nil)
+    def self.exchange_token(public_token, account_id_or_options = nil, options = {})
+      if account_id_or_options.is_a?(Hash)
+        account_id, options = nil, account_id_or_options
+      else
+        account_id = account_id_or_options
+      end
+      product, client = options.fetch(:product, :connect), options[:client]
       check_product product
 
       payload = { public_token: public_token }
@@ -150,13 +155,13 @@ module Plaid
     # stripe_token - The String stripe bank account token.
     # client       - The Plaid::Client instance used to connect to the API
     #                (default is to use global Plaid client - Plaid.client).
-    def initialize(product, access_token: nil, response: nil, mfa: nil,
-                   stripe_token: nil, client: nil)
+    def initialize(product, options = {})
+      access_token, response = options[:access_token], options[:response]
       @product = product
-      @client = client
+      @client = options[:client]
       @access_token = access_token if access_token
-      @mfa_required = mfa
-      @stripe_bank_account_token = stripe_token
+      @mfa_required = options[:mfa]
+      @stripe_bank_account_token = options[:stripe_token]
       @accounts = @initial_transactions = @info = @risk = @income = nil
 
       parse_response(response) if response
@@ -198,7 +203,13 @@ module Plaid
     #                             will be collected (default: today).
     #
     # Returns true if whole MFA process is completed, false otherwise.
-    def mfa_step(info = nil, send_method: nil, options: nil)
+    def mfa_step(info_or_options = nil, options_hash = {})
+      if info_or_options.is_a?(Hash)
+        info, options_hash = nil, info_or_options
+      else
+        info = info_or_options
+      end
+      send_method, options = options_hash[:send_method], options_hash[:options]
       payload = { access_token: access_token }
       payload[:mfa] = info if info
       if options || send_method
@@ -231,9 +242,9 @@ module Plaid
     # end_date   - The end Date (inclusive).
     #
     # Returns an Array of Transaction records.
-    def transactions(pending: false, account_id: nil,
-                     start_date: nil, end_date: nil)
-      options = { pending: pending }
+    def transactions(options_hash = {})
+      account_id, start_date, end_date = options_hash[:account_id], options_hash[:start_date], options_hash[:end_date]
+      options = { pending: options_hash.fetch(:pending, false) }
       options[:account] = account_id if account_id
       options[:gte] = start_date.to_s if start_date
       options[:lte] = end_date.to_s if end_date
@@ -364,8 +375,8 @@ module Plaid
     #        if it exists.
     #
     # Returns an Array of Account with numbers baked in.
-    def auth(sync: false)
-      if sync || !@accounts || !@accounts[0] || !@accounts[0].numbers
+    def auth(options = {})
+      if options.fetch(:sync, false) || !@accounts || !@accounts[0] || !@accounts[0].numbers
         response = Connector.new(:auth, :get, auth: true, client: client)
                             .post(access_token: access_token)
 
@@ -384,8 +395,8 @@ module Plaid
     #        if it exists.
     #
     # Returns a Plaid::Info instance.
-    def info(sync: false)
-      if sync || !@info
+    def info(options = {})
+      if options.fetch(:sync, false) || !@info
         parse_response(Connector.new(:info, :get, auth: true, client: client)
                                 .post(access_token: access_token))
       end
@@ -402,8 +413,8 @@ module Plaid
     #        if it exists.
     #
     # Returns a Plaid::Income instance.
-    def income(sync: false)
-      if sync || !@income
+    def income(options = {})
+      if options.fetch(:sync, false) || !@income
         parse_response(Connector.new(:income, :get, auth: true, client: client)
                                 .post(access_token: access_token))
       end
@@ -420,8 +431,8 @@ module Plaid
     #        if it exists.
     #
     # Returns an Array of accounts with risk attribute set.
-    def risk(sync: false)
-      if sync || !@accounts || !@accounts[0] || !@accounts[0].risk
+    def risk(options = {})
+      if options.fetch(:sync, false) || !@accounts || !@accounts[0] || !@accounts[0].risk
         parse_response(Connector.new(:risk, :get, auth: true, client: client)
                                 .post(access_token: access_token))
       end
