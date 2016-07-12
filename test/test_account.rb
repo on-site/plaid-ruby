@@ -78,14 +78,15 @@ class PlaidAccountTest < MiniTest::Test
     @acc_with_numbers ||= Plaid::Account.new(account_data_with_numbers)
   end
 
-  def account_data(available_balance: 1203.42, current_balance: 1274.93,
-                   id: 'QPO8Jo8vdDHMepg41PBwckXm4KdK1yUdmXOwK')
+  def account_data(options={})
+    options = { available_balance: 1203.42, current_balance: 1274.93,
+                   id: 'QPO8Jo8vdDHMepg41PBwckXm4KdK1yUdmXOwK' }.merge(options)
     {
-      '_id' => id,
+      '_id' => options[:id],
       '_item' => 'KdDjmojBERUKx3JkDd9RuxA5EvejA4SENO4AA',
       '_user' => 'eJXpMzpR65FP4RYno6rzuA7OZjd9n3Hna0RYa',
-      'balance' => { 'available' => available_balance,
-                     'current' => current_balance },
+      'balance' => { 'available' => options[:available_balance],
+                     'current' => options[:current_balance] },
       'institution_type' => 'chase',
       'meta' => { 'name' => 'Plaid Savings', 'number' => '9606' },
       'subtype' => 'savings',

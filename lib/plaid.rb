@@ -14,7 +14,7 @@ require 'uri'
 # Public: The Plaid namespace.
 module Plaid
   # Public: Available Plaid products.
-  PRODUCTS = %i(connect auth info income risk).freeze
+  PRODUCTS = [:connect, :auth, :info, :income, :risk].freeze
 
   class <<self
     # Public: The default Client.
@@ -51,12 +51,14 @@ module Plaid
     #          as well.
     #
     # Returns a Hash with keys.to_sym (or nil if hash is nil).
-    def symbolize_hash(hash, values: false)
+    def symbolize_hash(hash, options={})
+      options = { values: false }.merge(options)
+
       return unless hash
       return hash.map { |h| symbolize_hash(h) } if hash.is_a?(Array)
 
       hash.each_with_object({}) do |(k, v), memo|
-        memo[k.to_sym] = values ? v.to_sym : v
+        memo[k.to_sym] = options[:values] ? v.to_sym : v
       end
     end
   end

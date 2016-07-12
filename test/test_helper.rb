@@ -1,5 +1,6 @@
 require 'minitest/autorun'
 require 'webmock/minitest'
+MiniTest::Test = MiniTest::Unit::TestCase unless defined?(MiniTest::Test)
 
 require 'plaid'
 
@@ -28,8 +29,10 @@ module TestHelpers
     end
   end
 
-  def stub_api(method, path, body: {}, query: {}, status: 200, response: nil,
-               host: 'tartan.plaid.com')
+  def stub_api(method, path, options = {})
+    options = { body: {}, query: {}, status: 200, response: nil,
+               host: 'tartan.plaid.com' }.merge(options)
+    body, query, status, response, host = options[:body], options[:query], options[:status], options[:response], options[:host]
     response = fixture(response) if response.is_a?(Symbol)
 
     headers = {}

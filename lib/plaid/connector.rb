@@ -18,9 +18,14 @@ module Plaid
     #           included into the request payload.
     # client  - The Plaid::Client instance used to connect
     #           (default: Plaid.client).
-    def initialize(path, subpath = nil, auth: false, client: nil)
-      @auth = auth
-      @client = client || Plaid.client
+    def initialize(path, subpath_or_options = nil, options = {})
+      if subpath_or_options.is_a?(Hash)
+        subpath, options = nil, subpath_or_options
+      else
+        subpath = subpath_or_options
+      end
+      @auth = options.fetch(:auth, false)
+      @client = options[:client] || Plaid.client
       verify_configuration
 
       path = File.join(@client.env, path.to_s)
@@ -145,9 +150,9 @@ module Plaid
     end
 
     # Internal: Raise a NotConfiguredError exception with proper message.
-    def raise_not_configured(field, auth: true)
+    def raise_not_configured(field, options = {})
       message = "You must set Plaid::Client.#{field} before using any methods"
-      message << ' which require authentication' if auth
+      message << ' which require authentication' if options.fetch(:auth, true)
       message << "! It's current value is #{@client.send(field).inspect}. " \
                  'E.g. add a Plaid.config do .. end block somewhere in the ' \
                  'initialization code of your program.'

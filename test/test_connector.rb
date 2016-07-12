@@ -100,9 +100,9 @@ class PlaidConnectorTest < MiniTest::Test
     %({"code": 999, "message": "boy it's wrong", "resolve": "No way!"})
   end
 
-  def stub_test(status, body: error_body)
+  def stub_test(status, options = {})
     stub_request(:get, 'https://tartan.plaid.com/test')
-      .to_return(status: status, body: body)
+      .to_return(status: status, body: options.fetch(:body) { error_body })
   end
 
   def check_exception(e)

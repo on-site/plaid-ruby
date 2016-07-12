@@ -47,7 +47,7 @@ class PlaidTransactionTest < MiniTest::Test
 
   private
 
-  def parsed_transaction_data(pending: false)
+  def parsed_transaction_data(options = {})
     { '_account' => 'XARE85EJqKsjxLp6XR8ocg8VakrkXpTXmRdOo',
       '_id' => '0AZ0De04KqsreDgVwM1RSRYjyd8yXxSDQ8Zxn',
       'amount' => 200,
@@ -57,7 +57,7 @@ class PlaidTransactionTest < MiniTest::Test
         'location' => {
           'city' => 'San Francisco',
           'state' => 'CA' } },
-      'pending' => pending,
+      'pending' => options.fetch(:pending, false),
       '_pendingTransaction' => 'Nw83eMkqVXSaZvM17aVqtoOwLo1nOAipXeZ74',
       'type' => { 'primary' => 'special' },
       'category' => %w(Transfer Withdrawal ATM),

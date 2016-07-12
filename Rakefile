@@ -47,7 +47,7 @@ task :update_gh_pages do
 end
 
 desc 'Generate rdoc and update gh-pages on GitHub'
-task update_github_docs: %i(rdoc update_gh_pages) do
+task update_github_docs: [:rdoc, :update_gh_pages] do
   sh 'git push origin gh-pages'
 end
 
