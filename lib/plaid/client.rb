@@ -46,10 +46,11 @@ module Plaid
     #             'https://tartan.plaid.com'.
     # client_id - The String Plaid account client ID to authenticate requests.
     # secret    - The String Plaid account secret to authenticate requests.
-    def initialize(env: nil, client_id: nil, secret: nil)
+    def initialize(options = {})
+      env = options[:env]
       env && self.env = env
-      self.client_id = client_id
-      self.secret = secret
+      self.client_id = options[:client_id]
+      self.secret = options[:secret]
     end
 
     # Public: Check if client_id is configured.

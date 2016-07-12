@@ -252,9 +252,9 @@ module ProductTests
 
   protected
 
-  def credentials(access_token: true)
+  def credentials(options = {})
     { 'client_id' => 'test_id', 'secret' => 'test_secret' }.tap do |h|
-      h['access_token'] = 't0k3n' if access_token
+      h['access_token'] = 't0k3n' if options.fetch(:access_token, true)
     end
   end
 

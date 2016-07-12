@@ -66,8 +66,8 @@ module Plaid
     #          (default: Plaid.client).
     #
     # Returns an Array of Institution instances.
-    def self.all(client: nil)
-      Connector.new(:institutions, client: client).get.map do |idata|
+    def self.all(options = {})
+      Connector.new(:institutions, client: options[:client]).get.map do |idata|
         new(idata)
       end
     end
@@ -82,8 +82,8 @@ module Plaid
     #
     # Returns an Institution instance or raises Plaid::NotFoundError if
     # institution with given id is not found.
-    def self.get(id, client: nil)
-      new Connector.new(:institutions, id, client: client).get
+    def self.get(id, options = {})
+      new Connector.new(:institutions, id, client: options[:client]).get
     end
   end
 
@@ -175,8 +175,8 @@ module Plaid
     #
     # Returns an Institution instance or nil if institution with given id is not
     # found.
-    def self.get(id, client: nil)
-      client ||= Plaid.client
+    def self.get(id, options = {})
+      client = options.fetch(:client) { Plaid.client }
 
       # If client_id is set, use it, no authentication otherwise
       auth = client && !client.client_id.nil?
@@ -209,9 +209,10 @@ module Plaid
     #          (default: Plaid.client).
     #
     # Returns an Array of LongTailInstitution instances.
-    def self.all(count: 50, offset: 0, client: nil)
-      conn = Connector.new(:institutions, :longtail, auth: true, client: client)
-      resp = conn.post(count: count, offset: offset)
+    def self.all(options = {})
+      options = { count: 50, offset: 0, client: nil }.merge(options)
+      conn = Connector.new(:institutions, :longtail, auth: true, client: options[:client])
+      resp = conn.post(count: options[:count], offset: options[:offset])
       resp.map { |lti_data| new(lti_data) }
     end
 
@@ -226,7 +227,8 @@ module Plaid
     #           (default: nil).
     # client - The Plaid::Client instance used to connect
     #          (default: Plaid.client).
-    def self.search(query: nil, product: nil, client: nil)
+    def self.search(options = {})
+      query, product, client = options[:query], options[:product], options[:client]
       raise ArgumentError, 'query must be specified' \
         unless query.is_a?(String) && !query.empty?
 
